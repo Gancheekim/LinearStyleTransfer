@@ -9,7 +9,8 @@ import scipy.sparse
 from PIL import Image
 import scipy.sparse.linalg
 from cv2.ximgproc import jointBilateralFilter
-from torch.utils.serialization import load_lua
+# from torch.utils.serialization import load_lua # has been removed
+# import torchfile
 from numpy.lib.stride_tricks import as_strided
 
 def whiten(cF):
@@ -52,12 +53,15 @@ def numpy2cv2(cont,style,prop,width,height):
     #return np.concatenate((cont,np.concatenate((style,prop),axis=1)),axis=1)
     return prop,cont
 
-def makeVideo(content,style,props,outf):
+def makeVideo(content,style,props,outf,framerate):
     print('Stack transferred frames back to video...')
     layers,height,width = content[0].shape
-    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    video = cv2.VideoWriter(os.path.join(outf,'transfer.avi'),fourcc,10.0,(width,height))
-    ori_video = cv2.VideoWriter(os.path.join(outf,'content.avi'),fourcc,10.0,(width,height))
+    # fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    # video = cv2.VideoWriter(os.path.join(outf,'transfer.avi'),fourcc,framerate,(width,height))
+    # ori_video = cv2.VideoWriter(os.path.join(outf,'content.avi'),fourcc,framerate,(width,height))
+    video = cv2.VideoWriter(os.path.join(outf,'transfer.mp4'),fourcc,framerate,(width,height))
+    ori_video = cv2.VideoWriter(os.path.join(outf,'content.mp4'),fourcc,framerate,(width,height))
     for j in range(len(content)):
         prop,cont = numpy2cv2(content[j],style,props[j],width,height)
         cv2.imwrite('prop.png',prop)

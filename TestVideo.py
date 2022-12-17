@@ -1,4 +1,5 @@
 import os
+import glob
 import torch
 import argparse
 from PIL import Image
@@ -9,6 +10,7 @@ from libs.models import encoder3,encoder4
 from libs.models import decoder3,decoder4
 import torchvision.transforms as transforms
 from libs.utils import makeVideo, print_options
+import cv2
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--vgg_dir", default='models/vgg_r31.pth',
@@ -21,6 +23,8 @@ parser.add_argument("--style", default="data/style/in2.jpg",
                     help='path to style image')
 parser.add_argument("--content_dir", default="data/videos/content/mountain_2/",
                     help='path to video frames')
+parser.add_argument("--content_vid", default="",
+                    help='path to video mp4')                    
 parser.add_argument('--loadSize', type=int, default=512,
                     help='scale image size')
 parser.add_argument('--fineSize', type=int, default=512,
@@ -40,16 +44,37 @@ print_options(opt)
 os.makedirs(opt.outf,exist_ok=True)
 cudnn.benchmark = True
 
+#### read video, save each frame to ./temp_vid_frame/ ###
+temp_vid_frame_path = './temp_vid_frame/'
+if not os.path.exists(temp_vid_frame_path):
+    os.makedirs(temp_vid_frame_path)
+temp_dir = glob.glob(temp_vid_frame_path+'*')
+# make sure to remove previous video's frame
+for frames in temp_dir: 
+    os.remove(frames)
+
+caps = cv2.VideoCapture(opt.content_vid)
+framerate = int(caps.get(5))
+
+success, frame = caps.read()
+count = 0
+while success:
+  cv2.imwrite(f"{temp_vid_frame_path}{format(count,'05d')}.jpg", frame)     # save frame as JPEG file      
+  success, frame = caps.read()
+  count += 1
+print(f'total frame read is {count}')
+
 ################# DATA #################
 def loadImg(imgPath):
     img = Image.open(imgPath).convert('RGB')
     transform = transforms.Compose([
-                transforms.Scale(opt.fineSize),
+                transforms.Resize(opt.fineSize),
                 transforms.ToTensor()])
     return transform(img)
 styleV = loadImg(opt.style).unsqueeze(0)
 
-content_dataset = Dataset(opt.content_dir,
+# content_dataset = Dataset(opt.content_dir,
+content_dataset = Dataset(temp_vid_frame_path,
                           loadSize = opt.loadSize,
                           fineSize = opt.fineSize,
                           test     = True,
@@ -105,4 +130,4 @@ for i,(content,contentName) in enumerate(content_loader):
     transfer = transfer.clamp(0,1)
     result_frames.append(transfer.squeeze(0).cpu().numpy())
 
-makeVideo(contents,style,result_frames,opt.outf)
+makeVideo(contents,style,result_frames,opt.outf, framerate)

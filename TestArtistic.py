@@ -43,13 +43,13 @@ cudnn.benchmark = True
 content_dataset = Dataset(opt.contentPath,opt.loadSize,opt.fineSize,test=True)
 content_loader = torch.utils.data.DataLoader(dataset=content_dataset,
                                              batch_size = opt.batchSize,
-                                             shuffle = False,
-                                             num_workers = 1)
+                                             shuffle = False,)
+                                            #  num_workers = 1)
 style_dataset = Dataset(opt.stylePath,opt.loadSize,opt.fineSize,test=True)
 style_loader = torch.utils.data.DataLoader(dataset=style_dataset,
                                            batch_size = opt.batchSize,
-                                           shuffle = False,
-                                           num_workers = 1)
+                                           shuffle = False,)
+                                        #    num_workers = 1)
 
 ################# MODEL #################
 if(opt.layer == 'r31'):

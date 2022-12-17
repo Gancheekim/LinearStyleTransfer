@@ -25,12 +25,16 @@ rm models.zip
 ```
 python TestArtistic.py
 ```
+(子鈞) more specificly: 
+```
+python TestArtistic.py --stylePath <path_containing_style_imgs> --contentPath <path_containing_content_imgs>
+```
 or conduct style transfer on relu_31 features
 ```
 python TestArtistic.py --vgg_dir models/vgg_r31.pth --decoder_dir models/dec_r31.pth --matrixPath models/r31.pth --layer r31
 ```
 
-#### Photo-realistic style transfer
+#### Photo-realistic style transfer (子鈞: 我沒做這個，懶得compile)
 For photo-realistic style transfer, we need first compile the [pytorch_spn](https://github.com/Liusifei/pytorch_spn) repository.
 ```
 cd libs/pytorch_spn
@@ -46,6 +50,10 @@ Note: images with `_filtered.png` as postfix are images filtered by the SPN afte
 #### Video style transfer
 ```
 python TestVideo.py
+```
+(子鈞) more specificly: 
+```
+python TestVideo.py --style <style image with .jpg/.png format> --content_vid <content video with .mp4/.avi format>
 ```
 
 #### Real-time video demo
